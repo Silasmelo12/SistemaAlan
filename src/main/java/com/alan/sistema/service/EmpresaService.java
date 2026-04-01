@@ -11,6 +11,7 @@ import com.alan.sistema.enumeration.BillingType;
 import com.alan.sistema.requests.EmpresaPostRequestBody;
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.Attachment;
 import com.resend.services.emails.model.CreateEmailOptions;
 import com.resend.services.emails.model.CreateEmailResponse;
 
@@ -97,23 +98,25 @@ public class EmpresaService {
 
                         // Monta o anexo usando o modelo do Resend
                         // o Resend aceita anexos via CreateEmailOptions.Attachment
-                        CreateEmailOptions.Attachment attachment = CreateEmailOptions.Attachment.builder()
-                                .filename("boleto_" + cobrancaResponse.getId() + ".pdf")
-                                .content(base64Pdf)
-                                .contentType("application/pdf")
-                                .build();
+                        String attachment = "boleto_" + cobrancaResponse.getId() + ".pdf";
+                        String attachmentContent = java.util.Base64.getEncoder().encodeToString(pdfBytes);
 
+                        Attachment att = Attachment.builder()
+                            .fileName("boleto.pdf")
+                            .content(attachmentContent)
+                            .build();
+                        
                         CreateEmailOptions params = CreateEmailOptions.builder()
                                 .from("Acme <onboarding@resend.dev>")
                                 .to("silasmelo12@gmail.com")
                                 .subject("Boleto da associação Alan 01/04/2026")
                                 .html("<strong>Segue em anexo o boleto gerado.</strong>")
-                                .addAttachment(attachment)
+                                .attachments(att)
                                 .build();
 
                         try {
                             CreateEmailResponse data = resend.emails().send(params);
-                            System.out.println(data.getId());
+                            System.out.println("email enviado: "+data.getId());
                         } catch (ResendException e) {
                             e.printStackTrace();
                         }
