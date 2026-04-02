@@ -11,10 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alan.sistema.requests.EmpresaPostRequestBody;
 import com.alan.sistema.service.EmpresaService;
-import com.resend.Resend;
-import com.resend.core.exception.ResendException;
-import com.resend.services.emails.model.CreateEmailOptions;
-import com.resend.services.emails.model.CreateEmailResponse;
 
 @RestController
 @RequestMapping("/empresas")
@@ -39,12 +35,17 @@ public class EmpresaController {
     
     @PostMapping("/cadastrar")
     public ResponseEntity<String> cadastrarEmpresa(@RequestBody EmpresaPostRequestBody empresaPostRequestBody) {
-        String asaasId = empresaService.criarClienteAsaas(empresaPostRequestBody);
+        String asaasId = empresaService.processarAdesao(empresaPostRequestBody);
         return ResponseEntity.status(HttpStatus.CREATED)
                             .body("Empresa cadastrada e integrada! ID Asaas: " + asaasId);
     }
 
+    @PostMapping("/adesao")
+    public ResponseEntity<String> processarAdesao(@RequestBody EmpresaPostRequestBody empresaPostRequestBody) {
+        String asaasId = empresaService.processarAdesao(empresaPostRequestBody);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                            .body("Adesao da empresa. Id: " + asaasId);
+    }
 
-    
 }
 
