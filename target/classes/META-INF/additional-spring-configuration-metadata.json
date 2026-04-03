@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "asaas.token",
+      "type": "java.lang.String",
+      "description": "API token for Asaas. Use env ASAAS_TOKEN or ASAAS_TOKEN_ENV."
+    },
+    {
+      "name": "resend.token",
+      "type": "java.lang.String",
+      "description": "API token for Resend. Use env RESEND_TOKEN or RESEND_TOKEN_ENV."
+    }
+  ]
+}

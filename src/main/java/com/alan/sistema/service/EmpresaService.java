@@ -74,7 +74,7 @@ public class EmpresaService {
             // 3. Processa PDF e Envio (Opcional: Pode ser Assíncrono @Async)
             if(asaasCobrancaCreateResponseDTO.getBankSlipUrl() != null){
                 byte[] pdfContent = asaasService.baixarBoletoPdf(asaasCobrancaCreateResponseDTO.getBankSlipUrl());
-                String emailDestino = "silasmelo12@gmail.com";
+                String emailDestino = asaasCustomerCreateRequestDTO.getEmail();
                 String fileName = "boleto.pdf";
                 emailService.enviarEmail(emailDestino, pdfContent, fileName);
             }
