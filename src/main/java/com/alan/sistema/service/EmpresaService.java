@@ -68,22 +68,23 @@ public class EmpresaService {
 
     public String processarAdesao(EmpresaPostRequestBody empresaPostRequestBody){
 
-        Optional<Empresa> byCpfCnpj = empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj());
+        Empresa empresa = empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj()).orElse(new Empresa());
 
-        if(empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj()) != null){
-            Empresa empresa = new Empresa();
+        // SÓ ATUALIZA SE FOR NOVO
+        if (empresa.getId() == null) {
             empresa.setName(empresaPostRequestBody.getName());
             empresa.setCpfCnpj(empresaPostRequestBody.getCpfCnpj());
             empresa.setEmail(empresaPostRequestBody.getEmail());
             empresa.setTelefone(empresaPostRequestBody.getTelefone());
             empresa.setDataCriacao(Instant.now());
             empresa.setStatus(EmpresaStatus.PROCESSANDO);
-            empresaRepository.save(empresa);
+            empresa.setId(empresaRepository.save(empresa).getId()); 
+        } else {
+            log.info("Empresa já existe no banco. Seguindo apenas para conferência no Asaas.");
+            return empresa.getId();
         }
         // Salva a Empresa com status PENDENTE no MongoDB.
         
-
-
         // 1. Cria Cliente
         AsaasCustomerCreateRequestDTO asaasCustomerCreateRequestDTO = new AsaasCustomerCreateRequestDTO(
             empresaPostRequestBody.getName(),
@@ -119,11 +120,9 @@ public class EmpresaService {
         AsaasData asaasData = new AsaasData();
         asaasData.setCustomerId(asaasCustomerCreateResponseDTO.getId());
 
-
-        Empresa empresa = new Empresa();
         empresa.setAsaasData(asaasData);
-        empresa.setCpfCnpj(empresaPostRequestBody.getCpfCnpj());
-        empresa.setEmail(empresaPostRequestBody.getEmail());
+        //empresa.setCpfCnpj(empresaPostRequestBody.getCpfCnpj());
+        //empresa.setEmail(empresaPostRequestBody.getEmail());
         
         empresaRepository.save(empresa);
 
