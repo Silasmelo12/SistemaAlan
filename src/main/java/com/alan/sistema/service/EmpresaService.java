@@ -1,26 +1,42 @@
 package com.alan.sistema.service;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.alan.sistema.dto.AsaasCobrancaCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCobrancaCreateResponseDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
 import com.alan.sistema.enumeration.BillingType;
+import com.alan.sistema.enumeration.EmpresaStatus;
+import com.alan.sistema.model.AsaasData;
+import com.alan.sistema.model.Empresa;
+import com.alan.sistema.repository.EmpresaRepository;
 import com.alan.sistema.requests.EmpresaPostRequestBody;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class EmpresaService {
 
-    //private final AsaasClient asaasClient;
     private final AsaasService asaasService;
     private final EmailService emailService;
+    private final EmpresaRepository empresaRepository;
     //private final String ASAAS_TOKEN = "$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjAyZTAzYTlhLTBlMDMtNDJjOS05OTZjLWY0OTliZjYyYmJhODo6JGFhY2hfYThiZjkwMjYtZjg3ZS00M2M4LWFhNmUtNDlkYzA2NDQ0MGM1"; // Use seu token aqui
 
-    public EmpresaService(AsaasService asaasService, EmailService emailService) {
-        //this.asaasClient = asaasClient;
+    public EmpresaService(AsaasService asaasService, 
+        EmailService emailService,
+        EmpresaRepository empresaRepository) {
         this.asaasService = asaasService;
         this.emailService = emailService;
+        this.empresaRepository = empresaRepository;
+
     }
 
     /**
@@ -51,6 +67,23 @@ public class EmpresaService {
     }
 
     public String processarAdesao(EmpresaPostRequestBody empresaPostRequestBody){
+
+        Optional<Empresa> byCpfCnpj = empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj());
+
+        if(empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj()) != null){
+            Empresa empresa = new Empresa();
+            empresa.setName(empresaPostRequestBody.getName());
+            empresa.setCpfCnpj(empresaPostRequestBody.getCpfCnpj());
+            empresa.setEmail(empresaPostRequestBody.getEmail());
+            empresa.setTelefone(empresaPostRequestBody.getTelefone());
+            empresa.setDataCriacao(Instant.now());
+            empresa.setStatus(EmpresaStatus.PROCESSANDO);
+            empresaRepository.save(empresa);
+        }
+        // Salva a Empresa com status PENDENTE no MongoDB.
+        
+
+
         // 1. Cria Cliente
         AsaasCustomerCreateRequestDTO asaasCustomerCreateRequestDTO = new AsaasCustomerCreateRequestDTO(
             empresaPostRequestBody.getName(),
@@ -58,6 +91,8 @@ public class EmpresaService {
             empresaPostRequestBody.getEmail()
         );
         AsaasCustomerCreateResponseDTO asaasCustomerCreateResponseDTO = asaasService.criarCliente(asaasCustomerCreateRequestDTO);
+        
+        // Atualiza a Empresa no banco com o customerId retornado.
         
         // 2. Cria Cobrança
         AsaasCobrancaCreateRequestDTO asaasCobrancaCreateRequestDTO = new AsaasCobrancaCreateRequestDTO(
@@ -79,6 +114,59 @@ public class EmpresaService {
                 emailService.enviarEmail(emailDestino, pdfContent, fileName);
             }
         }
+
+        //salvar no banco
+        AsaasData asaasData = new AsaasData();
+        asaasData.setCustomerId(asaasCustomerCreateResponseDTO.getId());
+
+
+        Empresa empresa = new Empresa();
+        empresa.setAsaasData(asaasData);
+        empresa.setCpfCnpj(empresaPostRequestBody.getCpfCnpj());
+        empresa.setEmail(empresaPostRequestBody.getEmail());
+        
+        empresaRepository.save(empresa);
+
         return asaasCustomerCreateResponseDTO.getId();
     }
+
+    public EmpresaPostRequestBody consultarProgresso(String id) {
+        
+        return empresaRepository.findById(id)
+        .map(empresa -> new EmpresaPostRequestBody(
+            empresa.getName(),
+            empresa.getCpfCnpj(),
+            empresa.getEmail(),
+            empresa.getTelefone()
+        )).orElse(null);
+    }
+
+    public List<Empresa> listarTudo() {
+        return empresaRepository.findAll();
+    }
+
+    public void deletarTodosClientes() {
+        // TODO Auto-generated method stub
+        asaasService.deletarTodosClientes();
+    }
+
+    public void limparTudoGeral() {
+        log.warn("⚠️ INICIANDO LIMPEZA TOTAL: Asaas + MongoDB");
+    
+        try {
+            // 1. Limpa o Asaas (usando o método que acabamos de ajustar)
+            asaasService.deletarTodosClientes();
+            log.info("✅ Todos os clientes foram removidos do Asaas.");
+    
+            // 2. Limpa o MongoDB
+            empresaRepository.deleteAll();
+            log.info("✅ Todas as empresas foram removidas do MongoDB.");
+    
+        } catch (Exception e) {
+            log.error("❌ Erro durante a limpeza geral: {}", e.getMessage());
+            throw new RuntimeException("Falha ao sincronizar a limpeza: " + e.getMessage());
+        }
+    }
+
+    
 }
