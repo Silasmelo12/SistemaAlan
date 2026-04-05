@@ -16,6 +16,8 @@ import com.alan.sistema.model.Empresa;
 import com.alan.sistema.requests.EmpresaPostRequestBody;
 import com.alan.sistema.service.EmpresaService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/AlanSystem")
 public class EmpresaController {
@@ -41,7 +43,7 @@ public class EmpresaController {
     }
 
     @PostMapping()
-    public ResponseEntity<String> processarAdesao(@RequestBody EmpresaPostRequestBody empresaPostRequestBody) {
+    public ResponseEntity<String> processarAdesao(@RequestBody @Valid EmpresaPostRequestBody empresaPostRequestBody) {
         String asaasId = empresaService.processarAdesao(empresaPostRequestBody);
         return ResponseEntity.status(HttpStatus.CREATED)
                             .body("Adesao da empresa. Id: " + asaasId);

@@ -2,6 +2,7 @@ package com.alan.sistema.model;
 
 import java.time.Instant;
 
+import org.hibernate.validator.constraints.br.CNPJ;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -9,13 +10,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.alan.sistema.enumeration.EmpresaStatus;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 @Document
 public class Empresa {
 
     @Id
     private String id; // O MongoDB usa String para o ObjectId
+    
+    @NotBlank(message = "O nome é obrigatório")
     private String name;
     private String cpfCnpj;
+    @Email(message = "E-mail inválido")
     private String email;
     private String telefone;
     private EmpresaStatus status;
