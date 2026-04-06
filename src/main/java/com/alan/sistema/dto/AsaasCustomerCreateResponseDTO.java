@@ -2,7 +2,7 @@ package com.alan.sistema.dto;
 
 public class AsaasCustomerCreateResponseDTO {
 
-    private String id; // Ex: "cus_000005049321"
+    private String id; 
     private String name;
 
     // Getters e Setters

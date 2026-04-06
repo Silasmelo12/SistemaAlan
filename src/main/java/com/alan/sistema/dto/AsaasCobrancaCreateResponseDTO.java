@@ -44,6 +44,7 @@ public class AsaasCobrancaCreateResponseDTO {
     private Boolean postalService;
     private String escrow;
     private String refunds;
+    private String billingType;
 
     // Discount inner class
     public static class Discount {
@@ -394,5 +395,15 @@ public class AsaasCobrancaCreateResponseDTO {
     public void setRefunds(String refunds) {
         this.refunds = refunds;
     }
+
+    public String getBillingType() {
+        return billingType;
+    }
+
+    public void setBillingType(String billingType) {
+        this.billingType = billingType;
+    }
+
+    
 
 }

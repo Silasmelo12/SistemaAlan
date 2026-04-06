@@ -1,6 +1,8 @@
 package com.alan.sistema.service;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,16 +10,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
+import com.alan.sistema.client.ZapSignClient;
 import com.alan.sistema.dto.AsaasCobrancaCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCobrancaCreateResponseDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
+import com.alan.sistema.dto.ZapSignDocumentRequestDTO;
+import com.alan.sistema.dto.ZapSignDocumentResponseDTO;
+import com.alan.sistema.dto.ZapSignSignerDTO;
 import com.alan.sistema.enumeration.BillingType;
 import com.alan.sistema.enumeration.EmpresaStatus;
 import com.alan.sistema.model.AsaasData;
 import com.alan.sistema.model.Empresa;
+import com.alan.sistema.model.ZapSignData;
 import com.alan.sistema.repository.EmpresaRepository;
 import com.alan.sistema.requests.EmpresaPostRequestBody;
+import com.alan.sistema.util.ZapSignUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,14 +36,20 @@ public class EmpresaService {
     private final AsaasService asaasService;
     private final EmailService emailService;
     private final EmpresaRepository empresaRepository;
+    private final ZapSignClient zapSignClient;
+    private final ZapSignUtil zapSignService;
     //private final String ASAAS_TOKEN = "$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjAyZTAzYTlhLTBlMDMtNDJjOS05OTZjLWY0OTliZjYyYmJhODo6JGFhY2hfYThiZjkwMjYtZjg3ZS00M2M4LWFhNmUtNDlkYzA2NDQ0MGM1"; // Use seu token aqui
 
     public EmpresaService(AsaasService asaasService, 
         EmailService emailService,
-        EmpresaRepository empresaRepository) {
+        EmpresaRepository empresaRepository,
+        ZapSignClient zapSignClient,
+        ZapSignUtil zapSignService) {
         this.asaasService = asaasService;
         this.emailService = emailService;
         this.empresaRepository = empresaRepository;
+        this.zapSignClient = zapSignClient;
+        this.zapSignService = zapSignService;
 
     }
 
@@ -83,7 +97,6 @@ public class EmpresaService {
             log.info("Empresa já existe no banco. Seguindo apenas para conferência no Asaas.");
             return empresa.getId();
         }
-        // Salva a Empresa com status PENDENTE no MongoDB.
         
         // 1. Cria Cliente
         AsaasCustomerCreateRequestDTO asaasCustomerCreateRequestDTO = new AsaasCustomerCreateRequestDTO(
@@ -93,31 +106,83 @@ public class EmpresaService {
         );
         AsaasCustomerCreateResponseDTO asaasCustomerCreateResponseDTO = asaasService.criarCliente(asaasCustomerCreateRequestDTO);
         
-        // Atualiza a Empresa no banco com o customerId retornado.
+        if(asaasCustomerCreateResponseDTO.getId() == null){
+            log.info("Cliente não foi criado no Asaas, mas as informações estão salvas no banco para posterior processamento.");
+            return empresa.getId();
+        }
+
+        AsaasData asaasData = new AsaasData();
+        asaasData.setCustomerId(asaasCustomerCreateResponseDTO.getId());
         
+        empresa.setStatus(EmpresaStatus.CLIENTE_CRIADO);
+        empresa.setAsaasData(asaasData);
+        empresaRepository.save(empresa);
+
+        // No EmpresaService
+        //String pdfBase64 = zapSignService.gerarContratoBase64("empresa.getName()");
+        String caminho = "C:/Users/silas/OneDrive/Documentos/contrato_modelo.pdf";
+        String pdfbase64 = zapSignService.converterPdfParaBase64(caminho);
+        log.info("Base 64: "+pdfbase64.getBytes());
+        //ZapSignDocumentRequestDTO zapRequest = new ZapSignDocumentRequestDTO();
+        //zapRequest.setBase64(pdfBase64); // <--- O ZapSign vai receber isso e transformar em PDF lá
+        //zapRequest.setName("Contrato_" + empresa.getName() + ".pdf");
+        // ... restante do código de signers
+
+        // só posso criar a cobrança depois do contrato assinado.
+        // 1. Prepara o Signer (o dono da empresa)
+        ZapSignSignerDTO signer = new ZapSignSignerDTO();
+        signer.setName(empresa.getName());
+        signer.setEmail(empresa.getEmail());
+
+        // 2. Monta a requisição
+        ZapSignDocumentRequestDTO zapRequest = new ZapSignDocumentRequestDTO();
+        zapRequest.setName("Contrato de Prestação de Serviços - " + empresa.getName());
+        //zapRequest.setUrl("https://eppge.fgv.br/sites/default/files/teste.pdf"); // O PDF que você gerou
+        zapRequest.setBase64_pdf(pdfbase64);
+        zapRequest.setSigners(Collections.singletonList(signer));
+
+        // 3. Chama a API
+        ZapSignDocumentResponseDTO zapRes = zapSignClient.criarDocumento("Bearer " + "0bbff172-ddf6-4110-977b-12b830d8fecd0a720de2-7a93-480e-b3e6-d87ae07b5b63", zapRequest);
+
+        // 4. Salva o link de assinatura no seu MongoDB
+        ZapSignData zapData = new ZapSignData();
+        zapData.setExternalId(zapRes.getToken()); // ID do documento no ZapSign
+        zapData.setSignUrl(zapRes.getSigners().get(0).getSign_url()); // Link para o cliente clicar
+
+        empresa.setZapsignData(zapData);
+        empresaRepository.save(empresa);
+
         // 2. Cria Cobrança
+        
         AsaasCobrancaCreateRequestDTO asaasCobrancaCreateRequestDTO = new AsaasCobrancaCreateRequestDTO(
             asaasCustomerCreateResponseDTO.getId(),
                 BillingType.BOLETO,
                 100.0,
-                "2026-12-12" // Vencimento para daqui a 5 dias
+                LocalDate.now().plusDays(5).toString() // Vencimento para daqui a 5 dias
         );
+
         AsaasCobrancaCreateResponseDTO asaasCobrancaCreateResponseDTO = asaasService.criarCobranca(asaasCobrancaCreateRequestDTO);
+        if(asaasCobrancaCreateResponseDTO.getId() == null){
+            log.info("Cliente foi criado no Asaas, mas não foi possível gerar o boleto.");
+            return empresa.getId();
+        }
+        
+        empresa.setStatus(EmpresaStatus.AGUARDANDO_PAGAMENTO);
+        asaasData.setPaymentId(asaasCobrancaCreateResponseDTO.getId());
+        asaasData.setBillingType(asaasCobrancaCreateResponseDTO.getBillingType());
+        asaasData.setInvoiceUrl(asaasCobrancaCreateResponseDTO.getInvoiceUrl());
+        empresa.setAsaasData(asaasData);
+        empresaRepository.save(empresa);
 
-        if (asaasCobrancaCreateResponseDTO != null && asaasCobrancaCreateResponseDTO.getId() != null ){
-            System.out.println("Boleto gerado com sucesso! ID do boleto: " + asaasCobrancaCreateResponseDTO.getBankSlipUrl());
-
-            // 3. Processa PDF e Envio (Opcional: Pode ser Assíncrono @Async)
-            if(asaasCobrancaCreateResponseDTO.getBankSlipUrl() != null){
-                byte[] pdfContent = asaasService.baixarBoletoPdf(asaasCobrancaCreateResponseDTO.getBankSlipUrl());
-                String emailDestino = asaasCustomerCreateRequestDTO.getEmail();
-                String fileName = "boleto.pdf";
-                emailService.enviarEmail(emailDestino, pdfContent, fileName);
-            }
+        // 3. Processa PDF e Envio (Opcional: Pode ser Assíncrono @Async)
+        if(asaasCobrancaCreateResponseDTO.getBankSlipUrl() != null){
+            byte[] pdfContent = asaasService.baixarBoletoPdf(asaasCobrancaCreateResponseDTO.getBankSlipUrl());
+            String emailDestino = asaasCustomerCreateRequestDTO.getEmail();
+            String fileName = "boleto.pdf";
+            emailService.enviarEmail(emailDestino, pdfContent, fileName);
         }
 
         //salvar no banco
-        AsaasData asaasData = new AsaasData();
         asaasData.setCustomerId(asaasCustomerCreateResponseDTO.getId());
 
         empresa.setAsaasData(asaasData);

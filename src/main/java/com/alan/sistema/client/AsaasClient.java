@@ -13,6 +13,7 @@ import com.alan.sistema.dto.AsaasCobrancaCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCobrancaCreateResponseDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
+import com.alan.sistema.dto.AsaasCustomerListResponseDTO;
 
 @FeignClient(name = "asaasClient", url = "https://api-sandbox.asaas.com/v3")
 public interface  AsaasClient {

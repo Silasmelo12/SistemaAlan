@@ -1,8 +1,7 @@
-package com.alan.sistema.client;
+package com.alan.sistema.dto;
 
 import java.util.List;
 
-import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

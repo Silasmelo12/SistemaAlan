@@ -39,6 +39,12 @@ public class AsaasData {
         this.invoiceUrl = invoiceUrl;
         this.nfeId = nfeId;
     }
+
+    
+    public AsaasData(String customerId) {
+        this.customerId = customerId;
+    }
+
     public AsaasData() {
     }
 

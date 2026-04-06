@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alan.sistema.client.AsaasClient;
-import com.alan.sistema.client.AsaasCustomerListResponseDTO;
 import com.alan.sistema.dto.AsaasCobrancaCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCobrancaCreateResponseDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
+import com.alan.sistema.dto.AsaasCustomerListResponseDTO;
 
 import lombok.extern.slf4j.Slf4j;
 

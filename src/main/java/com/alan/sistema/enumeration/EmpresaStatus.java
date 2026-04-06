@@ -18,6 +18,7 @@ package com.alan.sistema.enumeration;
 
 public enum EmpresaStatus {
     PROCESSANDO,
+    CLIENTE_CRIADO,
     AGUARDANDO_PAGAMENTO,
     AGUARDANDO_ASSINATURA,
     ATIVO,
