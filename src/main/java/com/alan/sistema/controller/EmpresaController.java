@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alan.sistema.dto.EmpresaResponseDTO;
 import com.alan.sistema.model.Empresa;
 import com.alan.sistema.requests.EmpresaPostRequestBody;
 import com.alan.sistema.service.EmpresaService;
@@ -36,9 +37,8 @@ public class EmpresaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpresaPostRequestBody> consultarProgresso(@PathVariable String id) {
-        EmpresaPostRequestBody empresaPostRequestBody = empresaService.consultarProgresso(id);
-        
+    public ResponseEntity<EmpresaResponseDTO> consultarProgresso(@PathVariable String id) {
+        EmpresaResponseDTO empresaPostRequestBody = empresaService.consultarProgresso(id);
         return ResponseEntity.ok(empresaPostRequestBody);
     }
 

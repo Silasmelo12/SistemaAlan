@@ -20,4 +20,6 @@ public interface EmpresaRepository extends MongoRepository<Empresa, String>{
 
     Optional<Empresa> findByCpfCnpj(String cpfCnpj);
 
+    Optional<Empresa> findByZapsignDataExternalId(String externalId);
+
 }

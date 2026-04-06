@@ -3,9 +3,9 @@ package com.alan.sistema.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.stereotype.Service;
 
 import com.alan.sistema.client.AsaasClient;
@@ -15,14 +15,12 @@ import com.alan.sistema.dto.AsaasCustomerCreateRequestDTO;
 import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
 import com.alan.sistema.dto.AsaasCustomerListResponseDTO;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Service
-@Slf4j
 public class AsaasService {
     
     private final AsaasClient asaasClient;
     private final String token;
+    private static final Logger log = LoggerFactory.getLogger(AsaasService.class);
 
     /* public AsaasService(AsaasClient asaasClient, @Value("${asaas.token}") String token) {
         this.asaasClient = asaasClient;

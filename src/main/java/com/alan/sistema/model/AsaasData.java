@@ -1,10 +1,12 @@
 package com.alan.sistema.model;
 
+import com.alan.sistema.enumeration.BillingType;
+
 public class AsaasData {
 
     private String customerId;   // cus_xxxx
     private String ultimoPaymentId;    // pay_xxxx (ID do boleto atual)
-    private String billingType;  // BOLETO, PIX ou CREDIT_CARD
+    private BillingType billingType;  // BOLETO, PIX ou CREDIT_CARD
     private String invoiceUrl;   // Link para o cliente pagar
     private String nfeId;
 
@@ -20,10 +22,10 @@ public class AsaasData {
     public void setPaymentId(String paymentId) {
         this.ultimoPaymentId = paymentId;
     }
-    public String getBillingType() {
+    public BillingType getBillingType() {
         return billingType;
     }
-    public void setBillingType(String billingType) {
+    public void setBillingType(BillingType billingType) {
         this.billingType = billingType;
     }
     public String getInvoiceUrl() {
@@ -32,7 +34,7 @@ public class AsaasData {
     public void setInvoiceUrl(String invoiceUrl) {
         this.invoiceUrl = invoiceUrl;
     }
-    public AsaasData(String customerId, String paymentId, String billingType, String invoiceUrl, String nfeId) {
+    public AsaasData(String customerId, String paymentId, BillingType billingType, String invoiceUrl, String nfeId) {
         this.customerId = customerId;
         this.ultimoPaymentId = paymentId;
         this.billingType = billingType;

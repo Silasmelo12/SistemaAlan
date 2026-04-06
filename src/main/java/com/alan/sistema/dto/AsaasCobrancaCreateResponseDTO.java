@@ -1,5 +1,7 @@
 package com.alan.sistema.dto;
 
+import com.alan.sistema.enumeration.BillingType;
+
 public class AsaasCobrancaCreateResponseDTO {
 
     private String id;
@@ -44,7 +46,7 @@ public class AsaasCobrancaCreateResponseDTO {
     private Boolean postalService;
     private String escrow;
     private String refunds;
-    private String billingType;
+    private BillingType billingType;
 
     // Discount inner class
     public static class Discount {
@@ -396,11 +398,11 @@ public class AsaasCobrancaCreateResponseDTO {
         this.refunds = refunds;
     }
 
-    public String getBillingType() {
+    public BillingType getBillingType() {
         return billingType;
     }
 
-    public void setBillingType(String billingType) {
+    public void setBillingType(BillingType billingType) {
         this.billingType = billingType;
     }
 
