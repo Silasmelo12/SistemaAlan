@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-import com.alan.sistema.dto.ZapSignDocumentRequestDTO;
-import com.alan.sistema.dto.ZapSignDocumentResponseDTO;
+import com.alan.sistema.dto.integration.zapsign.ZapSignDocumentRequestDTO;
+import com.alan.sistema.dto.integration.zapsign.ZapSignDocumentResponseDTO;
 
 @FeignClient(name = "ZapSignClient", url="https://sandbox.api.zapsign.com.br/api/v1/")
 public interface  ZapSignClient {

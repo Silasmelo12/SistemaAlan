@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alan.sistema.dto.EmpresaResponseDTO;
+import com.alan.sistema.dto.requests.EmpresaRequestDTO;
+import com.alan.sistema.dto.response.EmpresaResponseDTO;
 import com.alan.sistema.model.Empresa;
-import com.alan.sistema.requests.EmpresaPostRequestBody;
 import com.alan.sistema.service.EmpresaService;
 
 import jakarta.validation.Valid;
@@ -43,8 +43,8 @@ public class EmpresaController {
     }
 
     @PostMapping()
-    public ResponseEntity<String> processarAdesao(@RequestBody @Valid EmpresaPostRequestBody empresaPostRequestBody) {
-        String asaasId = empresaService.processarAdesao(empresaPostRequestBody);
+    public ResponseEntity<String> processarAdesao(@RequestBody @Valid EmpresaRequestDTO empresaRequestDTO) {
+        String asaasId = empresaService.processarAdesaoAtualizado(empresaRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                             .body("Adesao da empresa. Id: " + asaasId);
     }

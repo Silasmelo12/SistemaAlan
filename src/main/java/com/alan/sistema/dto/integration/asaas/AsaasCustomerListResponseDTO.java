@@ -1,4 +1,4 @@
-package com.alan.sistema.dto;
+package com.alan.sistema.dto.integration.asaas;
 
 import java.util.List;
 

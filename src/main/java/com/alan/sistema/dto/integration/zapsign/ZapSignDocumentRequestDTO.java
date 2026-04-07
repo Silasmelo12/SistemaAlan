@@ -1,4 +1,4 @@
-package com.alan.sistema.dto;
+package com.alan.sistema.dto.integration.zapsign;
 
 import java.util.List;
 

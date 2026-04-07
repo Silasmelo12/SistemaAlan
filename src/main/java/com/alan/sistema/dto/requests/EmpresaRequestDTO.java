@@ -1,4 +1,4 @@
-package com.alan.sistema.requests;
+package com.alan.sistema.dto.requests;
 
 import org.hibernate.validator.constraints.br.CNPJ;
 
@@ -7,22 +7,20 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-public class EmpresaPostRequestBody {
+public class EmpresaRequestDTO {
 
     private String name;
     @CNPJ
     @NotBlank
-    @NotEmpty
-    @NotNull
     private String cpfCnpj;
     @Email
     @NotBlank
-    @NotEmpty
-    @NotNull
     private String email;
-    private String telefone;
 
-    public EmpresaPostRequestBody(String name, String cpfCnpj, String email, String telefone) {
+    private String telefone;
+    private Integer quantidadeFuncionarios;
+
+    public EmpresaRequestDTO(String name, String cpfCnpj, String email, String telefone) {
         this.name = name;
         this.cpfCnpj = cpfCnpj;
         this.email = email;
@@ -30,7 +28,7 @@ public class EmpresaPostRequestBody {
 
     }
 
-    public EmpresaPostRequestBody() {
+    public EmpresaRequestDTO() {
     }
 
     public String getName() {
@@ -64,6 +62,14 @@ public class EmpresaPostRequestBody {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
+    }
+
+    public Integer getQuantidadeFuncionarios() {
+        return quantidadeFuncionarios;
+    }
+
+    public void setQuantidadeFuncionarios(Integer quantidadeFuncionarios) {
+        this.quantidadeFuncionarios = quantidadeFuncionarios;
     }
 }
 

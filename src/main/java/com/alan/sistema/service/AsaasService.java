@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.alan.sistema.client.AsaasClient;
-import com.alan.sistema.dto.AsaasCobrancaCreateRequestDTO;
-import com.alan.sistema.dto.AsaasCobrancaCreateResponseDTO;
-import com.alan.sistema.dto.AsaasCustomerCreateRequestDTO;
-import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
-import com.alan.sistema.dto.AsaasCustomerListResponseDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCobrancaCreateRequestDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCobrancaCreateResponseDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCustomerCreateRequestDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCustomerCreateResponseDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCustomerListResponseDTO;
 
 @Service
 public class AsaasService {

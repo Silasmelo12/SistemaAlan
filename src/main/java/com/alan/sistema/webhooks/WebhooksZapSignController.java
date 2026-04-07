@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alan.sistema.dto.ZapSignWebhookDTO;
+import com.alan.sistema.dto.integration.zapsign.ZapSignWebhookDTO;
 import com.alan.sistema.service.EmpresaService;
 
 @RestController
@@ -20,11 +20,9 @@ public class WebhooksZapSignController {
     }
     
     @PostMapping()
-    public ResponseEntity<Void> postMethodName(@RequestBody ZapSignWebhookDTO entity) {
-        //TODO: process POST request
-
-        System.out.println("o documento foi assinado com sucesso: " + entity);
-        empresaService.processarAssinaturaZapSign(entity.getToken());
+    public ResponseEntity<Void> handleWebhook(@RequestBody ZapSignWebhookDTO entity) {
+        System.out.println("Webhook recebido de zapsign ");
+        empresaService.processarAssinaturaZapSignAtualizado(entity);
         return ResponseEntity.ok().build();
     }
     

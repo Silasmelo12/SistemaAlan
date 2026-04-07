@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.alan.sistema.dto.AsaasCobrancaCreateRequestDTO;
-import com.alan.sistema.dto.AsaasCobrancaCreateResponseDTO;
-import com.alan.sistema.dto.AsaasCustomerCreateRequestDTO;
-import com.alan.sistema.dto.AsaasCustomerCreateResponseDTO;
-import com.alan.sistema.dto.AsaasCustomerListResponseDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCobrancaCreateRequestDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCobrancaCreateResponseDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCustomerCreateRequestDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCustomerCreateResponseDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasCustomerListResponseDTO;
 
 @FeignClient(name = "asaasClient", url = "https://api-sandbox.asaas.com/v3")
 public interface  AsaasClient {

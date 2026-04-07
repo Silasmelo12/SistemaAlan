@@ -21,13 +21,19 @@ public class Empresa {
     
     @NotBlank(message = "O nome é obrigatório")
     private String name;
+
     @Indexed(unique = true)
     private String cpfCnpj;
+
     @Indexed(unique = true)
     @Email(message = "E-mail inválido")
     private String email;
+
     private String telefone;
+
     private EmpresaStatus status;
+
+    private Integer quantidadeFuncionarios;
     
     @CreatedDate
     private Instant dataCriacao;
@@ -35,9 +41,11 @@ public class Empresa {
     @LastModifiedDate
     private Instant dataUltimaAtualizacao;
 
+    @Indexed
     // Objeto aninhado com dados do Asaas
     private AsaasData asaasData;
 
+    @Indexed
     // Objeto aninhado com dados do ZapSign
     private ZapSignData zapsignData;
 
@@ -125,5 +133,17 @@ public class Empresa {
 
     public void setZapsignData(ZapSignData zapsignData) {
         this.zapsignData = zapsignData;
+    }
+
+
+
+    public Integer getQuantidadeFuncionarios() {
+        return quantidadeFuncionarios;
+    }
+
+
+
+    public void setQuantidadeFuncionarios(Integer quantidadeFuncionarios) {
+        this.quantidadeFuncionarios = quantidadeFuncionarios;
     } 
 }

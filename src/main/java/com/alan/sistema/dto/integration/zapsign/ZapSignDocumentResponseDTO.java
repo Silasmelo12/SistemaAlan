@@ -1,4 +1,4 @@
-package com.alan.sistema.dto;
+package com.alan.sistema.dto.integration.zapsign;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;

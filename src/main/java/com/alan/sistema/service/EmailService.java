@@ -5,6 +5,9 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.Attachment;
@@ -16,6 +19,8 @@ public class EmailService {
 
     private final Resend resend;
     private final String token;
+    private static final Logger log = LoggerFactory.getLogger(EmpresaService.class);
+    
 
     public EmailService(@Value("${resend.token:TOKEN_RESEND_NAO_CONFIGURADO}") String token){
         this.resend = new Resend(token);
@@ -40,10 +45,9 @@ public class EmailService {
 
         try {
             CreateEmailResponse data = resend.emails().send(params);
-            System.out.println("email enviado: " + data.getId());
+            log.info("email enviado: " + data.getId());
         } catch (ResendException e) {
-            e.printStackTrace();
-            System.out.println("Erro ao enviar email: " + e.getMessage());
+            log.error("Erro ao enviar email: " + e.getMessage());
         }
     }
 }

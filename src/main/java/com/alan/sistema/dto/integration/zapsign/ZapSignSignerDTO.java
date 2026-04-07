@@ -1,4 +1,4 @@
-package com.alan.sistema.dto;
+package com.alan.sistema.dto.integration.zapsign;
 
 public class ZapSignSignerDTO {
     private String name;

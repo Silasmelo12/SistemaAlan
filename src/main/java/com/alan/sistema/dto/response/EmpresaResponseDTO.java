@@ -1,4 +1,4 @@
-package com.alan.sistema.dto;
+package com.alan.sistema.dto.response;
 
 public class EmpresaResponseDTO {
     private String id;
