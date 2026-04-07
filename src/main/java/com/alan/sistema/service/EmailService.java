@@ -18,13 +18,11 @@ import com.resend.services.emails.model.CreateEmailResponse;
 public class EmailService {
 
     private final Resend resend;
-    private final String token;
     private static final Logger log = LoggerFactory.getLogger(EmpresaService.class);
     
 
     public EmailService(@Value("${resend.token:TOKEN_RESEND_NAO_CONFIGURADO}") String token){
         this.resend = new Resend(token);
-        this.token = token;
     }
     
     public void enviarEmail(String emailDestino, byte[] pdfContent, String fileName) {

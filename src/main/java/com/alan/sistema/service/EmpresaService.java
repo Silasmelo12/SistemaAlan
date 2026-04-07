@@ -1,7 +1,5 @@
 package com.alan.sistema.service;
 
-import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.Collections;
@@ -32,7 +30,6 @@ import com.alan.sistema.model.AsaasData;
 import com.alan.sistema.model.Empresa;
 import com.alan.sistema.model.ZapSignData;
 import com.alan.sistema.repository.EmpresaRepository;
-import com.alan.sistema.util.ZapSignUtil;
 
 
 @Service
@@ -42,23 +39,20 @@ public class EmpresaService {
     private final EmailService emailService;
     private final EmpresaRepository empresaRepository;
     private final ZapSignClient zapSignClient;
-    private final ZapSignUtil zapSignService;
     private final EmpresaMapper empresaMapper;
     private static final Logger log = LoggerFactory.getLogger(EmpresaService.class);
-    private String zapSignToken;
+    private final String zapSignToken;
     
     public EmpresaService(AsaasService asaasService,
             EmailService emailService,
             EmpresaRepository empresaRepository,
             ZapSignClient zapSignClient,
-            ZapSignUtil zapSignService,
             EmpresaMapper empresaMapper,
         @Value("${zapsign.token}") String zapSignToken) {
         this.asaasService = asaasService;
         this.emailService = emailService;
         this.empresaRepository = empresaRepository;
         this.zapSignClient = zapSignClient;
-        this.zapSignService = zapSignService;
         this.zapSignToken= zapSignToken;
         this.empresaMapper = empresaMapper;
 
@@ -217,7 +211,7 @@ public class EmpresaService {
 
     private void gerarCobrancaInicialAsaas(Empresa empresa) {
         double valorPorFuncionário = 50.0;
-        Integer qtd = (empresa.getQuantidadeFuncionarios()!=null) ? empresa.getQuantidadeFuncionarios():1;
+        int qtd = empresa.getQuantidadeFuncionarios() == null ? 1 : Math.max(1, empresa.getQuantidadeFuncionarios());
         double valorTotal = qtd*valorPorFuncionário;
 
         log.info("Gerando cobrança para {}: {} funcionários x R$ {} = R$ {}",
