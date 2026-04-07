@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.alan.sistema.client.ZapSignClient;
@@ -37,8 +38,9 @@ public class EmpresaService {
     private final ZapSignClient zapSignClient;
     private final ZapSignUtil zapSignService;
     private static final Logger log = LoggerFactory.getLogger(EmpresaService.class);
-    //private final String ASAAS_TOKEN = "$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjAyZTAzYTlhLTBlMDMtNDJjOS05OTZjLWY0OTliZjYyYmJhODo6JGFhY2hfYThiZjkwMjYtZjg3ZS00M2M4LWFhNmUtNDlkYzA2NDQ0MGM1"; // Use seu token aqui
-
+    @Value("${zapsign.token}")
+    private String zapSignToken;
+    
     public EmpresaService(AsaasService asaasService,
             EmailService emailService,
             EmpresaRepository empresaRepository,
@@ -155,7 +157,7 @@ public class EmpresaService {
         zapRequest.setSigners(Collections.singletonList(signer));
 
         // 3. Chama a API
-        ZapSignDocumentResponseDTO zapRes = zapSignClient.criarDocumento("Bearer " + "0bbff172-ddf6-4110-977b-12b830d8fecd0a720de2-7a93-480e-b3e6-d87ae07b5b63", zapRequest);
+        ZapSignDocumentResponseDTO zapRes = zapSignClient.criarDocumento("Bearer " + zapSignToken, zapRequest);
 
         // 4. Salva o link de assinatura no seu MongoDB
         ZapSignData zapData = new ZapSignData();

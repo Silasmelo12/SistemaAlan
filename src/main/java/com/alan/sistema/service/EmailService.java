@@ -2,6 +2,7 @@ package com.alan.sistema.service;
 
 import java.util.Base64;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.resend.Resend;
@@ -16,15 +17,11 @@ public class EmailService {
     private final Resend resend;
     private final String token;
 
-    /* public EmailService(@Value("${resend.token}") String token){
+    public EmailService(@Value("${resend.token:TOKEN_RESEND_NAO_CONFIGURADO}") String token){
         this.resend = new Resend(token);
         this.token = token;
-    } */
-    public EmailService() {
-        this.resend = new Resend("re_PHcKKNd5_G2ex4AQPpcqzdQeHFr2KfukP");
-        this.token = "re_PHcKKNd5_G2ex4AQPpcqzdQeHFr2KfukP";
     }
-
+    
     public void enviarEmail(String emailDestino, byte[] pdfContent, String fileName) {
         String base64Content = Base64.getEncoder().encodeToString(pdfContent);
 

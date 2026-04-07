@@ -23,17 +23,11 @@ public class AsaasService {
     private final String token;
     private static final Logger log = LoggerFactory.getLogger(AsaasService.class);
 
-    public AsaasService(AsaasClient asaasClient, @Value("${asaas.token:TOKEN_NAO_CONFIGURADO}") String token) {
+    public AsaasService(AsaasClient asaasClient, @Value("${asaas.token:TOKEN_ASAAS_NAO_CONFIGURADO}") String token) {
         this.asaasClient = asaasClient;
         this.token = token;
     } 
 
-   /* 
-    public AsaasService(AsaasClient asaasClient) {
-        this.asaasClient = asaasClient;
-        this.token = "$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjcwNDhlZDRlLWUwOWQtNDdhZS05YmQ4LWUyNGU4ODQyN2M3Yjo6JGFhY2hfNmIyYTA5ZmItYzhmNC00MzgxLTlkNjMtNmM1OWFmZDY1OTBm";
-    }
- */
     public AsaasCustomerCreateResponseDTO criarCliente(AsaasCustomerCreateRequestDTO asaasCustomerCreateRequestDTO) {
         return asaasClient.criarCliente(token, asaasCustomerCreateRequestDTO);
     }
