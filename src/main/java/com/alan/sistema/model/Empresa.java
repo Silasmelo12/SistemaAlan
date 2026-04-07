@@ -5,6 +5,7 @@ import java.time.Instant;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;  
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.alan.sistema.enumeration.EmpresaStatus;
@@ -20,7 +21,9 @@ public class Empresa {
     
     @NotBlank(message = "O nome é obrigatório")
     private String name;
+    @Indexed(unique = true)
     private String cpfCnpj;
+    @Indexed(unique = true)
     @Email(message = "E-mail inválido")
     private String email;
     private String telefone;

@@ -84,6 +84,9 @@ public class EmpresaService {
 
     public String processarAdesao(EmpresaPostRequestBody empresaPostRequestBody) {
 
+        if (empresaRepository.existsByCpfCnpj(empresaPostRequestBody.getCpfCnpj())) {
+            throw new RuntimeException("Já existe uma empresa cadastrada com este CNPJ.");
+        }
         Empresa empresa = empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj()).orElse(null);
         log.info("Token Asaas carregado: {}...", zapSignToken.substring(0, 5));
         if (empresa == null) {
