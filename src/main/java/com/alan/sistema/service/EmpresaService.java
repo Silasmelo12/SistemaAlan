@@ -38,19 +38,20 @@ public class EmpresaService {
     private final ZapSignClient zapSignClient;
     private final ZapSignUtil zapSignService;
     private static final Logger log = LoggerFactory.getLogger(EmpresaService.class);
-    @Value("${zapsign.token}")
     private String zapSignToken;
     
     public EmpresaService(AsaasService asaasService,
             EmailService emailService,
             EmpresaRepository empresaRepository,
             ZapSignClient zapSignClient,
-            ZapSignUtil zapSignService) {
+            ZapSignUtil zapSignService,
+        @Value("${zapsign.token}") String zapSignToken) {
         this.asaasService = asaasService;
         this.emailService = emailService;
         this.empresaRepository = empresaRepository;
         this.zapSignClient = zapSignClient;
         this.zapSignService = zapSignService;
+        this.zapSignToken= zapSignToken;
 
     }
 
@@ -83,10 +84,10 @@ public class EmpresaService {
 
     public String processarAdesao(EmpresaPostRequestBody empresaPostRequestBody) {
 
-        Empresa empresa = empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj()).orElse(new Empresa());
-
-        // SÓ ATUALIZA SE FOR NOVO
-        if (empresa.getId() == null) {
+        Empresa empresa = empresaRepository.findByCpfCnpj(empresaPostRequestBody.getCpfCnpj()).orElse(null);
+        log.info("Token Asaas carregado: {}...", zapSignToken.substring(0, 5));
+        if (empresa == null) {
+            empresa = new Empresa();
             empresa.setName(empresaPostRequestBody.getName());
             empresa.setCpfCnpj(empresaPostRequestBody.getCpfCnpj());
             empresa.setEmail(empresaPostRequestBody.getEmail());
@@ -95,29 +96,54 @@ public class EmpresaService {
             empresa.setStatus(EmpresaStatus.PROCESSANDO);
             empresa.setId(empresaRepository.save(empresa).getId());
         } else {
-            log.info("Empresa já existe no banco. Seguindo apenas para conferência no Asaas.");
-            return empresa.getId();
+            empresa.setName(empresaPostRequestBody.getName());
+            empresa.setEmail(empresaPostRequestBody.getEmail());
+            empresa.setTelefone(empresaPostRequestBody.getTelefone());
+            empresaRepository.save(empresa);
+
+            if (empresa.getZapsignData() != null && empresa.getZapsignData().getSignUrl() != null) {
+                if (empresa.getStatus() != EmpresaStatus.AGUARDANDO_ASSINATURA) {
+                    empresa.setStatus(EmpresaStatus.AGUARDANDO_ASSINATURA);
+                    empresaRepository.save(empresa);
+                }
+                log.info("Documento ZapSign já existente para o CPF/CNPJ. Retornando id.");
+                return empresa.getId();
+            }
+            if (jaFluxoAdesaoJaAvancado(empresa.getStatus())) {
+                log.info(
+                        "Empresa já existe com adesão em etapa final ou concluída (status={}). Retornando id sem reprocessar integrações.",
+                        empresa.getStatus());
+                return empresa.getId();
+            }
         }
 
-        // 1. Cria Cliente
-        AsaasCustomerCreateRequestDTO asaasCustomerCreateRequestDTO = new AsaasCustomerCreateRequestDTO(
-                empresaPostRequestBody.getName(),
-                empresaPostRequestBody.getCpfCnpj(),
-                empresaPostRequestBody.getEmail()
-        );
-        AsaasCustomerCreateResponseDTO asaasCustomerCreateResponseDTO = asaasService.criarCliente(asaasCustomerCreateRequestDTO);
+        boolean precisaCriarClienteAsaas = empresa.getAsaasData() == null
+                || empresa.getAsaasData().getCustomerId() == null
+                || empresa.getAsaasData().getCustomerId().isBlank();
 
-        if (asaasCustomerCreateResponseDTO.getId() == null) {
-            log.info("Cliente não foi criado no Asaas, mas as informações estão salvas no banco para posterior processamento.");
-            return empresa.getId();
+        if (precisaCriarClienteAsaas) {
+            AsaasCustomerCreateRequestDTO asaasCustomerCreateRequestDTO = new AsaasCustomerCreateRequestDTO(
+                    empresaPostRequestBody.getName(),
+                    empresaPostRequestBody.getCpfCnpj(),
+                    empresaPostRequestBody.getEmail()
+            );
+            AsaasCustomerCreateResponseDTO asaasCustomerCreateResponseDTO = asaasService.criarCliente(asaasCustomerCreateRequestDTO);
+
+            if (asaasCustomerCreateResponseDTO.getId() == null) {
+                log.info("Cliente não foi criado no Asaas, mas as informações estão salvas no banco para posterior processamento.");
+                return empresa.getId();
+            }
+
+            AsaasData asaasData = new AsaasData();
+            asaasData.setCustomerId(asaasCustomerCreateResponseDTO.getId());
+
+            empresa.setStatus(EmpresaStatus.CLIENTE_CRIADO);
+            empresa.setAsaasData(asaasData);
+            empresaRepository.save(empresa);
+        } else {
+            log.info("Cliente Asaas já vinculado (customerId={}). Pulando criação e retomando fluxo.",
+                    empresa.getAsaasData().getCustomerId());
         }
-
-        AsaasData asaasData = new AsaasData();
-        asaasData.setCustomerId(asaasCustomerCreateResponseDTO.getId());
-
-        empresa.setStatus(EmpresaStatus.CLIENTE_CRIADO);
-        empresa.setAsaasData(asaasData);
-        empresaRepository.save(empresa);
 
         // No EmpresaService
         //String pdfBase64 = zapSignService.gerarContratoBase64("empresa.getName()");
@@ -247,8 +273,23 @@ public class EmpresaService {
         asaasService.deletarTodosClientes();
     }
 
-    public void limparTudoGeral() {
+    /**
+     * Idempotência: após gerar link de assinatura ou evoluir no funil de cobrança, não recria cliente/contrato.
+     */
+    private boolean jaFluxoAdesaoJaAvancado(EmpresaStatus status) {
+        if (status == null) {
+            return false;
+        }
+        return status == EmpresaStatus.AGUARDANDO_ASSINATURA
+                || status == EmpresaStatus.AGUARDANDO_PAGAMENTO
+                || status == EmpresaStatus.ATIVO
+                || status == EmpresaStatus.CONTRATO_ASSINADO
+                || status == EmpresaStatus.INADIMPLENTE
+                || status == EmpresaStatus.BLOQUEADO;
+    }
 
+    public void limparTudoGeral() {
+        log.info("Token Asaas carregado: {}...", zapSignToken.substring(0, 50));
         log.warn("⚠️ INICIANDO LIMPEZA TOTAL: Asaas + MongoDB");
 
         try {
