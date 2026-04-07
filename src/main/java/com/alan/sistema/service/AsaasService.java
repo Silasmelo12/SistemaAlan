@@ -6,6 +6,7 @@ import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.alan.sistema.client.AsaasClient;
@@ -17,21 +18,22 @@ import com.alan.sistema.dto.AsaasCustomerListResponseDTO;
 
 @Service
 public class AsaasService {
-    
+
     private final AsaasClient asaasClient;
     private final String token;
     private static final Logger log = LoggerFactory.getLogger(AsaasService.class);
 
-    /* public AsaasService(AsaasClient asaasClient, @Value("${asaas.token}") String token) {
+    public AsaasService(AsaasClient asaasClient, @Value("${asaas.token:TOKEN_NAO_CONFIGURADO}") String token) {
         this.asaasClient = asaasClient;
         this.token = token;
-    } */
+    } 
 
-        public AsaasService(AsaasClient asaasClient) {
-            this.asaasClient = asaasClient;
-            this.token = "$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjcwNDhlZDRlLWUwOWQtNDdhZS05YmQ4LWUyNGU4ODQyN2M3Yjo6JGFhY2hfNmIyYTA5ZmItYzhmNC00MzgxLTlkNjMtNmM1OWFmZDY1OTBm";
-        }
-
+   /* 
+    public AsaasService(AsaasClient asaasClient) {
+        this.asaasClient = asaasClient;
+        this.token = "$aact_hmlg_000MzkwODA2MWY2OGM3MWRlMDU2NWM3MzJlNzZmNGZhZGY6OjcwNDhlZDRlLWUwOWQtNDdhZS05YmQ4LWUyNGU4ODQyN2M3Yjo6JGFhY2hfNmIyYTA5ZmItYzhmNC00MzgxLTlkNjMtNmM1OWFmZDY1OTBm";
+    }
+ */
     public AsaasCustomerCreateResponseDTO criarCliente(AsaasCustomerCreateRequestDTO asaasCustomerCreateRequestDTO) {
         return asaasClient.criarCliente(token, asaasCustomerCreateRequestDTO);
     }
@@ -52,10 +54,10 @@ public class AsaasService {
 
     public void deletarTodosClientes() {
         log.warn("Iniciando processo de exclusão de todos os clientes no Asaas...");
-        
+
         // 1. Busca a lista de clientes (ajuste o limite conforme necessário)
-        AsaasCustomerListResponseDTO lista = asaasClient.listarClientes(token,100);
-    
+        AsaasCustomerListResponseDTO lista = asaasClient.listarClientes(token, 100);
+
         if (lista != null && lista.getData() != null) {
             lista.getData().forEach(cliente -> {
                 try {
@@ -66,7 +68,7 @@ public class AsaasService {
                 }
             });
         }
-        
+
         log.info("Processo de limpeza concluído.");
     }
 
