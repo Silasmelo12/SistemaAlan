@@ -22,4 +22,5 @@ public interface EmpresaRepository extends MongoRepository<Empresa, String>{
 
     Optional<Empresa> findByZapsignDataExternalId(String externalId);
 
+
 }

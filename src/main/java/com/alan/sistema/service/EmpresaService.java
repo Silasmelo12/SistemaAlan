@@ -333,6 +333,26 @@ public class EmpresaService {
     }
 
     public void processarPagamentoAsaas(AsaasWebhookDTO dto) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        boolean pago = "PAYMENT_CONFIRMED".equals(dto.getEvent()) || 
+        "PAYMENT_RECEIVED".equals(dto.getEvent()) ||
+        "PAYMENT_UPDATED".equals(dto.getEvent());
+
+        if(!pago){
+            log.info("Evento Asaas ignorado (Não é confirmação de pagamento): {}",dto.getEvent());
+            return;
+        }
+
+        Empresa empresa = empresaRepository.findByAsaasDataUltimoPaymentId(dto.getPayment().getId())
+        .orElseThrow(()->new RuntimeException("Cobrança não encontrada: " + dto.getPayment().getId()));
+
+        if(empresa.getStatus() != EmpresaStatus.ATIVO){
+            empresa.setStatus(EmpresaStatus.ATIVO);
+            empresaRepository.save(empresa);
+
+            log.info("SUCESSO: Empresa {} agora está ATIVA!", empresa.getName());
+        
+            // 4. Próximo passo opcional: Enviar e-mail de boas-vindas com acesso ao sistema
+            //enviarEmailBoasVindas(empresa);
+        }
     }
 }
