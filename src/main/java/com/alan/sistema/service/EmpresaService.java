@@ -17,6 +17,7 @@ import com.alan.sistema.dto.integration.asaas.AsaasCobrancaCreateRequestDTO;
 import com.alan.sistema.dto.integration.asaas.AsaasCobrancaCreateResponseDTO;
 import com.alan.sistema.dto.integration.asaas.AsaasCustomerCreateRequestDTO;
 import com.alan.sistema.dto.integration.asaas.AsaasCustomerCreateResponseDTO;
+import com.alan.sistema.dto.integration.asaas.AsaasWebhookDTO;
 import com.alan.sistema.dto.integration.zapsign.ZapSignDocumentRequestDTO;
 import com.alan.sistema.dto.integration.zapsign.ZapSignDocumentResponseDTO;
 import com.alan.sistema.dto.integration.zapsign.ZapSignSignerDTO;
@@ -329,5 +330,9 @@ public class EmpresaService {
             log.error("❌ Erro durante a limpeza geral: {}", e.getMessage());
             throw new RuntimeException("Falha ao sincronizar a limpeza: " + e.getMessage());
         }
+    }
+
+    public void processarPagamentoAsaas(AsaasWebhookDTO dto) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
